@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
+import { sendGAEvent } from '@next/third-parties/google';
 import { 
   parseTxt, 
   parseDocx, 
@@ -136,6 +137,15 @@ export default function DocumentComparer({ defaultFormat = 'pdf' }: DocumentComp
   const handleCompare = async (bypassOcrPrompt = false) => {
     if (!fileOld || !fileNew) return;
 
+    // Track comparison starting
+    if (!bypassOcrPrompt) {
+      sendGAEvent({
+        event: 'comparison_started',
+        file_old_type: fileOld.name.split('.').pop()?.toUpperCase() || 'UNKNOWN',
+        file_new_type: fileNew.name.split('.').pop()?.toUpperCase() || 'UNKNOWN',
+      });
+    }
+
     setIsProcessing(true);
     setError(null);
     setProgressPercent(10);
@@ -238,6 +248,15 @@ export default function DocumentComparer({ defaultFormat = 'pdf' }: DocumentComp
       setIsProcessing(false);
       setProgressPercent(100);
 
+      // Track comparison completed successfully
+      sendGAEvent({
+        event: 'comparison_completed',
+        file_old_type: fileOld.name.split('.').pop()?.toUpperCase() || 'UNKNOWN',
+        file_new_type: fileNew.name.split('.').pop()?.toUpperCase() || 'UNKNOWN',
+        detected_changes: diffResults.totalChanges,
+        success_status: true,
+      });
+
       setTimeout(() => {
         resultsRef.current?.scrollIntoView({ behavior: 'smooth' });
       }, 100);
@@ -250,6 +269,15 @@ export default function DocumentComparer({ defaultFormat = 'pdf' }: DocumentComp
       );
       setIsProcessing(false);
       setProgressPercent(0);
+
+      // Track comparison failed
+      sendGAEvent({
+        event: 'comparison_failed',
+        file_old_type: fileOld.name.split('.').pop()?.toUpperCase() || 'UNKNOWN',
+        file_new_type: fileNew.name.split('.').pop()?.toUpperCase() || 'UNKNOWN',
+        success_status: false,
+        error_message: 'READ_OR_PROCESSING_FAILURE',
+      });
     }
   };
 
@@ -266,6 +294,20 @@ export default function DocumentComparer({ defaultFormat = 'pdf' }: DocumentComp
       handleCompare(true);
     }
   }, [ocrConsent, scannedPdfDetect]);
+
+  // Listen for window printing (which acts as Download PDF / print report)
+  useEffect(() => {
+    const handleAfterPrint = () => {
+      sendGAEvent({
+        event: 'report_downloaded',
+        file_old_type: fileOld?.name.split('.').pop()?.toUpperCase() || 'UNKNOWN',
+        file_new_type: fileNew?.name.split('.').pop()?.toUpperCase() || 'UNKNOWN',
+        detected_changes: result?.totalChanges ?? 0,
+      });
+    };
+    window.addEventListener('afterprint', handleAfterPrint);
+    return () => window.removeEventListener('afterprint', handleAfterPrint);
+  }, [fileOld, fileNew, result]);
 
   const toggleContext = (id: string) => {
     setExpandedChanges((prev) => {
