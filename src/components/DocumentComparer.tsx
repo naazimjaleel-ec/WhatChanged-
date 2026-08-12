@@ -695,7 +695,7 @@ export default function DocumentComparer({ defaultFormat = 'pdf' }: DocumentComp
                       : 'text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white'
                   }`}
                 >
-                  All ({result.changes.length})
+                  All Changes ({result.changes.length})
                 </button>
                 <button
                   onClick={() => setActiveTab('changed')}
@@ -705,7 +705,7 @@ export default function DocumentComparer({ defaultFormat = 'pdf' }: DocumentComp
                       : 'text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white'
                   }`}
                 >
-                  Changed ({result.changedCount})
+                  Edited ({result.changedCount})
                 </button>
                 <button
                   onClick={() => setActiveTab('added')}
@@ -725,7 +725,7 @@ export default function DocumentComparer({ defaultFormat = 'pdf' }: DocumentComp
                       : 'text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white'
                   }`}
                 >
-                  Removed ({result.removedCount})
+                  Deleted ({result.removedCount})
                 </button>
               </div>
 
@@ -762,25 +762,25 @@ export default function DocumentComparer({ defaultFormat = 'pdf' }: DocumentComp
                                 : 'bg-amber-50 dark:bg-amber-950/20 text-amber-700 dark:text-amber-405'
                             }`}
                           >
-                            {change.type}
+                            {change.type === 'ADDED' ? 'Added' : change.type === 'REMOVED' ? 'Deleted' : 'Edited'}
                           </span>
-                          <span className="truncate max-w-[200px] sm:max-w-xs font-semibold" title={change.section}>
-                            {change.section}
+                          <span className="truncate max-w-[200px] sm:max-w-xs font-semibold text-zinc-800 dark:text-zinc-200" title={change.section}>
+                            {change.section === 'General' ? 'General Text' : `Section: ${change.section}`}
                           </span>
                         </div>
                         <div className="flex items-center gap-4">
                           <span>Page {change.pageNum}</span>
                           <button
                             onClick={() => toggleContext(change.id)}
-                            className="text-zinc-650 hover:text-indigo-600 dark:text-zinc-400 dark:hover:text-indigo-400 inline-flex items-center gap-1 font-bold uppercase"
+                            className="text-zinc-650 hover:text-indigo-600 dark:text-zinc-400 dark:hover:text-indigo-400 inline-flex items-center gap-1 font-bold uppercase text-[9px] tracking-wider"
                           >
                             {isExpanded ? (
                               <>
-                                <Minimize2 size={9} /> Hide context
+                                <Minimize2 size={10} /> Hide surrounding text
                               </>
                             ) : (
                               <>
-                                <Maximize2 size={9} /> Show context
+                                <Maximize2 size={10} /> Show surrounding text
                               </>
                             )}
                           </button>
