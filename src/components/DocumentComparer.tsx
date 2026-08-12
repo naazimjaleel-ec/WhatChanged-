@@ -157,8 +157,8 @@ export default function DocumentComparer({ defaultFormat = 'pdf' }: DocumentComp
     if (!bypassOcrPrompt) {
       sendGAEvent({
         event: 'comparison_started',
-        file_old_type: fileOld.name.split('.').pop()?.toUpperCase() || 'UNKNOWN',
-        file_new_type: fileNew.name.split('.').pop()?.toUpperCase() || 'UNKNOWN',
+        file_type_old: fileOld.name.split('.').pop()?.toUpperCase() || 'UNKNOWN',
+        file_type_new: fileNew.name.split('.').pop()?.toUpperCase() || 'UNKNOWN',
       });
     }
 
@@ -267,10 +267,9 @@ export default function DocumentComparer({ defaultFormat = 'pdf' }: DocumentComp
       // Track comparison completed successfully
       sendGAEvent({
         event: 'comparison_completed',
-        file_old_type: fileOld.name.split('.').pop()?.toUpperCase() || 'UNKNOWN',
-        file_new_type: fileNew.name.split('.').pop()?.toUpperCase() || 'UNKNOWN',
-        detected_changes: diffResults.totalChanges,
-        success_status: true,
+        file_type_old: fileOld.name.split('.').pop()?.toUpperCase() || 'UNKNOWN',
+        file_type_new: fileNew.name.split('.').pop()?.toUpperCase() || 'UNKNOWN',
+        change_count: diffResults.totalChanges,
       });
 
       setTimeout(() => {
@@ -289,10 +288,8 @@ export default function DocumentComparer({ defaultFormat = 'pdf' }: DocumentComp
       // Track comparison failed
       sendGAEvent({
         event: 'comparison_failed',
-        file_old_type: fileOld.name.split('.').pop()?.toUpperCase() || 'UNKNOWN',
-        file_new_type: fileNew.name.split('.').pop()?.toUpperCase() || 'UNKNOWN',
-        success_status: false,
-        error_message: 'READ_OR_PROCESSING_FAILURE',
+        file_type_old: fileOld.name.split('.').pop()?.toUpperCase() || 'UNKNOWN',
+        file_type_new: fileNew.name.split('.').pop()?.toUpperCase() || 'UNKNOWN',
       });
     }
   };
@@ -316,14 +313,13 @@ export default function DocumentComparer({ defaultFormat = 'pdf' }: DocumentComp
     const handleAfterPrint = () => {
       sendGAEvent({
         event: 'report_downloaded',
-        file_old_type: fileOld?.name.split('.').pop()?.toUpperCase() || 'UNKNOWN',
-        file_new_type: fileNew?.name.split('.').pop()?.toUpperCase() || 'UNKNOWN',
-        detected_changes: result?.totalChanges ?? 0,
+        file_type_old: fileOld?.name.split('.').pop()?.toUpperCase() || 'UNKNOWN',
+        file_type_new: fileNew?.name.split('.').pop()?.toUpperCase() || 'UNKNOWN',
       });
     };
     window.addEventListener('afterprint', handleAfterPrint);
     return () => window.removeEventListener('afterprint', handleAfterPrint);
-  }, [fileOld, fileNew, result]);
+  }, [fileOld, fileNew]);
 
   const toggleContext = (id: string) => {
     setExpandedChanges((prev) => {
