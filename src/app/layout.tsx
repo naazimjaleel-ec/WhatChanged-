@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "./globals.css";
 import ThemeToggle from "@/components/ThemeToggle";
-import { GoogleAnalytics } from "@next/third-parties/google";
+import Script from "next/script";
 
 const poppins = Poppins({
   variable: "--font-poppins",
@@ -59,6 +59,20 @@ export default function RootLayout({
             `,
           }}
         />
+        {/* Google tag (gtag.js) */}
+        <Script
+          async
+          src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID || 'G-DWSSNQ6KBH'}`}
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${process.env.NEXT_PUBLIC_GA_ID || 'G-DWSSNQ6KBH'}');
+          `}
+        </Script>
       </head>
       <body className="min-h-full flex flex-col bg-white text-zinc-950 dark:bg-black dark:text-zinc-50 selection:bg-indigo-500 selection:text-white">
         <header className="border-b border-zinc-200 dark:border-zinc-900 bg-white dark:bg-black">
@@ -179,9 +193,6 @@ export default function RootLayout({
             </div>
           </div>
         </footer>
-        {process.env.NEXT_PUBLIC_GA_ID && (
-          <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />
-        )}
       </body>
     </html>
   );

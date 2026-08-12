@@ -1,13 +1,29 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { sendGAEvent } from '@next/third-parties/google';
 import { 
   parseTxt, 
   parseDocx, 
   parsePdf, 
   runOcrOnPdf 
 } from '@/utils/documentParsers';
+
+// Custom event tracker that integrates directly with standard manual Google Tag (gtag.js / dataLayer)
+const sendGAEvent = (data: { event: string; [key: string]: any }) => {
+  if (typeof window !== 'undefined') {
+    const windowWithGtag = window as any;
+    const { event, ...params } = data;
+    if (windowWithGtag.gtag) {
+      windowWithGtag.gtag('event', event, params);
+    } else {
+      windowWithGtag.dataLayer = windowWithGtag.dataLayer || [];
+      windowWithGtag.dataLayer.push({
+        event,
+        ...params
+      });
+    }
+  }
+};
 import { 
   preprocessDocument, 
   compareDocuments, 
